@@ -69,18 +69,38 @@ int cameraNum = 2;
 
 /* Requirement Light Class for light Sources */
 class Light {
-
+public:
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
 };
 
 // direction  light
 class DirLight : public Light {
+public:
+    glm::vec3 direction;
 
+    void assignlightDir(glm::vec3 newDir) {
+        direction = newDir;
+    }
+
+    glm::vec3 getlightDir() {
+        return direction;
+    }
 };
 
 // point light
 class PointLight : public Light {
+    glm::vec3 position;
 
+    float constant;
+    float linear;
+    float quadratic;
 };
+
+// make the classes
+PointLight pointLight;
+DirLight dirLight;
 
 void Key_Callback(GLFWwindow* window,
     int key,
@@ -528,6 +548,9 @@ int main(void)
     float specStr = 0.5f;
     float specPhong = 16.0f;
 
+    // direction light
+    dirLight.assignlightDir(glm::vec3(-4, 11, -3));
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -633,6 +656,12 @@ int main(void)
 
         unsigned int specPhongAddress = glGetUniformLocation(shaderProg, "specPhong");
         glUniform1f(specPhongAddress, specPhong);
+
+        // directional light
+        unsigned int dirLightAddress = glGetUniformLocation(shaderProg, "dirLight");
+        glUniform3fv(dirLightAddress,
+            1,
+            glm::value_ptr(dirLight.getlightDir()));
             
         unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
         glUniformMatrix4fv(projLoc,
@@ -681,26 +710,6 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
-        // diffuse stuff
-        glUniform3fv(lightAddress,
-            1,
-            glm::value_ptr(lightPos));
-        glUniform3fv(lightColorAddress,
-            1,
-            glm::value_ptr(lightColor));
-
-        // ambient stuff
-        glUniform1f(ambientStrAddress, ambientStr);
-        glUniform3fv(ambientColorAddress,
-            1,
-            glm::value_ptr(ambientColor));
-
-        // specphong stuff
-        glUniform3fv(cameraPosAddress,
-            1,
-            glm::value_ptr(cameraPos));
-        glUniform1f(specStrAddress, specStr);
-        glUniform1f(specPhongAddress, specPhong);
 
         glUniformMatrix4fv(projLoc,
             1,

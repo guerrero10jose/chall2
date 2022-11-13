@@ -8,6 +8,9 @@ uniform vec3 lightColor;
 uniform float ambientStr;
 uniform vec3 ambientColor;
 
+// for direction light
+uniform vec3 dirLight;
+
 uniform vec3 cameraPos;
 uniform float specStr;
 uniform float specPhong;
@@ -23,7 +26,8 @@ void main() {
 
 	// get required parameter for diffuse formula
 	vec3 normal = normalize(normCoord);
-	vec3 lightDir = normalize(lightPos - fragPos);
+	// vec3 lightDir = normalize(lightPos - fragPos);
+	vec3 lightDir = normalize(-dirLight);
 
 	// apply formula and multiply with light color
 	float diff = max(dot(normal, lightDir), 0.0f);
