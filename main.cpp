@@ -91,11 +91,28 @@ public:
 
 // point light
 class PointLight : public Light {
-    glm::vec3 position;
-
+public:
     float constant;
     float linear;
     float quadratic;
+
+    void assignNums(float cons, float lin, float quad) {
+        constant = cons;
+        linear = lin;
+        quadratic = quadratic;
+    }
+
+    float getConstant() {
+        return constant;
+    }
+
+    float getLinear() {
+        return linear;
+    }
+
+    float getQuadratic() {
+        return quadratic;
+    }
 };
 
 // make the classes
@@ -551,6 +568,9 @@ int main(void)
     // direction light
     dirLight.assignlightDir(glm::vec3(-4, 11, -3));
 
+    // point light
+    pointLight.assignNums(1.f, 0.045f, 0.0075f);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -662,6 +682,16 @@ int main(void)
         glUniform3fv(dirLightAddress,
             1,
             glm::value_ptr(dirLight.getlightDir()));
+
+        // point light
+        unsigned int consLightAddress = glGetUniformLocation(shaderProg, "constant");
+        glUniform1f(consLightAddress, pointLight.getConstant());
+
+        unsigned int linLightAddress = glGetUniformLocation(shaderProg, "linear");
+        glUniform1f(linLightAddress, pointLight.getLinear());
+
+        unsigned int quadLightAddress = glGetUniformLocation(shaderProg, "quadratic");
+        glUniform1f(quadLightAddress, pointLight.getQuadratic());
             
         unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
         glUniformMatrix4fv(projLoc,
