@@ -802,9 +802,7 @@ int main(void)
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x + 0.4f + tran_x, y + 0.5f + tran_y, z - 0.4f + tran_z));
-
-        pointLightPos = glm::vec3(x + 0.4f + tran_x, y + 0.5f + tran_y, z - 0.4f + tran_z);
+            pointLightPos = glm::vec3(x + 0.4f + tran_x, y + 0.5f + tran_y, z - 0.4f + tran_z));
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
