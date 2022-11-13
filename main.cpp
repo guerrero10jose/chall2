@@ -22,6 +22,8 @@ float window_height = 600.0f, window_width = 600.0f;
 float x_mod = 0;
 float rot_x = 0, rot_y = 1.f, rot_z = 0;
 float theta_x = 0, theta_y = 90.0f, theta_z = 0;
+float tran_x = 0, tran_y = 0, tran_z = 0;
+int objCtrl = 1;
 
 /* Requirement: Camera Class */
 class Camera {
@@ -127,48 +129,87 @@ void Key_Callback(GLFWwindow* window,
     int action,
     int mods)
 {
-    if (key == GLFW_KEY_W &&
-        action == GLFW_REPEAT) {
-        theta_x -= 2.f;
-    }
-
-    if (key == GLFW_KEY_A &&
-        action == GLFW_REPEAT) {
-        theta_y -= 2.f;
-    }
-
-    if (key == GLFW_KEY_S &&
-        action == GLFW_REPEAT) {
-        theta_x += 2.f;
-    }
-
-    // when user presses D
-    if (key == GLFW_KEY_D &&
-        action == GLFW_REPEAT) {
-        theta_y += 2.f;
-    }
-
-    if (key == GLFW_KEY_Q &&
-        action == GLFW_REPEAT) {
-        theta_z -= 2.f;
-    }
-
-    if (key == GLFW_KEY_E &&
-        action == GLFW_REPEAT) {
-        theta_z += 2.f;
-    }
-
     /* Requirement: Swap Cameras */
     if (key == GLFW_KEY_1 &&
         action == GLFW_PRESS) {
         cameraNum = 1;
+        objCtrl = 2;
     }
 
     /* Requirement: Swap Cameras */
     if (key == GLFW_KEY_2 &&
         action == GLFW_PRESS) {
         cameraNum = 2;
+        objCtrl = 1;
     }
+
+    if (objCtrl == 1) {
+        if (key == GLFW_KEY_W &&
+            action == GLFW_REPEAT) {
+            theta_x -= 2.f;
+        }
+
+        if (key == GLFW_KEY_A &&
+            action == GLFW_REPEAT) {
+            theta_y -= 2.f;
+        }
+
+        if (key == GLFW_KEY_S &&
+            action == GLFW_REPEAT) {
+            theta_x += 2.f;
+        }
+
+        // when user presses D
+        if (key == GLFW_KEY_D &&
+            action == GLFW_REPEAT) {
+            theta_y += 2.f;
+        }
+
+        if (key == GLFW_KEY_Q &&
+            action == GLFW_REPEAT) {
+            theta_z -= 2.f;
+        }
+
+        if (key == GLFW_KEY_E &&
+            action == GLFW_REPEAT) {
+            theta_z += 2.f;
+        }
+    }
+
+    // ctrl of light source
+    if (objCtrl == 2) {
+        if (key == GLFW_KEY_W &&
+            action == GLFW_REPEAT) {
+            tran_y -= 0.1f;
+        }
+
+        if (key == GLFW_KEY_A &&
+            action == GLFW_REPEAT) {
+            tran_x -= 0.1f;
+        }
+
+        if (key == GLFW_KEY_S &&
+            action == GLFW_REPEAT) {
+            tran_y += 0.1f;
+        }
+
+        // when user presses D
+        if (key == GLFW_KEY_D &&
+            action == GLFW_REPEAT) {
+            tran_x += 0.1f;
+        }
+
+        if (key == GLFW_KEY_Q &&
+            action == GLFW_REPEAT) {
+            tran_z -= 0.1f;
+        }
+
+        if (key == GLFW_KEY_E &&
+            action == GLFW_REPEAT) {
+            tran_z += 0.1f;
+        }
+    }
+
 
 }
 
@@ -577,6 +618,7 @@ int main(void)
 
     // point light
     pointLight.assignNums(1.f, 0.045f, 0.0075f);
+    glm::vec3 pointLightPos;
 
     // other variables
     int objectNum;
@@ -671,7 +713,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
-        lightPos = glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f);
+        //lightPos = glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
@@ -721,6 +763,7 @@ int main(void)
         unsigned int quadLightAddress = glGetUniformLocation(shaderProg, "quadratic");
         glUniform1f(quadLightAddress, pointLight.getQuadratic());
 
+
         unsigned int objNumAddress = glGetUniformLocation(shaderProg, "objNum");
         glUniform1i(objNumAddress, objectNum);
             
@@ -759,7 +802,9 @@ int main(void)
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x + 0.4f, y + 0.5f, z - 0.4f));
+            glm::vec3(x + 0.4f + tran_x, y + 0.5f + tran_y, z - 0.4f + tran_z));
+
+        pointLightPos = glm::vec3(x + 0.4f + tran_x, y + 0.5f + tran_y, z - 0.4f + tran_z);
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
@@ -772,6 +817,11 @@ int main(void)
 
         //glBindTexture(GL_TEXTURE_2D, texture);
         //glUniform1i(tex0Address, 0);
+
+        unsigned int pointLightPosAddress = glGetUniformLocation(shaderProg, "pointLightPos");
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(pointLightPos));
 
         glUniform1i(objNumAddress, objectNum);
 
