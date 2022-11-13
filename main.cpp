@@ -587,21 +587,21 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //theta += 0.1f;
 
-        /* Movements */
+        glm::vec3 cameraPos;
 
         // switch statement to switch between cameras
         switch (cameraNum) {
-        case 1: projection = camera1.getProjection(); break;
-        case 2: projection = camera2.getProjection(); break;
+        case 1: projection = camera1.getProjection(); cameraPos = glm::vec3(0.f, 1.f, 0.5f); break;
+        case 2: projection = camera2.getProjection(); cameraPos = glm::vec3(0.f, 0.f, 1.f);  break;
         }
 
         objectNum = 1;
 
         /* Camera */
         // camera position
-        glm::vec3 cameraPos = glm::vec3(0, 0, 1.0f);
+        //glm::vec3 cameraPos = glm::vec3(0.f, 1.f, 0.5f);
+        //glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 1.f);
 
         glm::mat4 cameraPositionMatrix =
             glm::translate(glm::mat4(1.0f),
