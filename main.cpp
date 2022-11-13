@@ -21,41 +21,108 @@
 float window_height = 600.0f, window_width = 600.0f;
 float x_mod = 0;
 
+/* Requirement: Camera Class */
+class Camera {
+public:
+    glm::mat4 projection;
+
+    glm::mat4 getProjection() {
+        return projection;
+    }
+};
+
+// orthographic camera class
+class OrthoCamera : public Camera {
+public:
+    OrthoCamera() {
+        // old code used from previous implementation
+        // TODO: view from top
+        projection = glm::ortho(-2.0f,
+            2.0f,
+            -2.0f,
+            2.0f,
+            -1.0f,
+            1.0f);
+    }
+};
+
+// perspective camera class
+class PerspectiveCamera : public Camera {
+public:
+    PerspectiveCamera() {
+        // old code used from previous implementation
+        projection = glm::perspective(
+            glm::radians(60.0f),
+            window_height / window_width,
+            0.1f,
+            100.0f
+        );
+    }
+};
+
+/* Create Camera Classes */
+OrthoCamera camera1;
+PerspectiveCamera camera2;
+
+// int cameranum
+int cameraNum = 2;
+
+/* Requirement Light Class for light Sources */
+class Light {
+
+};
+
+// direction  light
+class DirLight : public Light {
+
+};
+
+// point light
+class PointLight : public Light {
+
+};
+
 void Key_Callback(GLFWwindow* window,
     int key,
     int scancode,
     int action,
     int mods)
 {
+    if (key == GLFW_KEY_W &&
+        action == GLFW_PRESS) {
+
+    }
+
+    if (key == GLFW_KEY_A &&
+        action == GLFW_PRESS) {
+
+    }
+
+    if (key == GLFW_KEY_S &&
+        action == GLFW_PRESS) {
+
+    }
+
     // when user presses D
     if (key == GLFW_KEY_D &&
         action == GLFW_PRESS) {
         // move bunny to the right
         x_mod += 10.0f;
     }
+
+    /* Requirement: Swap Cameras */
+    if (key == GLFW_KEY_1 &&
+        action == GLFW_PRESS) {
+        cameraNum = 1;
+    }
+
+    /* Requirement: Swap Cameras */
+    if (key == GLFW_KEY_2 &&
+        action == GLFW_PRESS) {
+        cameraNum = 1;
+    }
+
 }
-
-/* Requirement: Camera Class */
-class Camera {
-
-};
-
-// orthographic camera class
-class Ortho: public Camera {
-
-};
-
-// perspective camera class
-class Persp : public Camera {
-
-    // old code used for previous implementation
-    glm::mat4 projection = glm::ortho(-2.0f,
-        2.0f,
-        -2.0f,
-        2.0f,
-        -1.0f,
-        1.0f);
-};
 
 int main(void)
 {
@@ -85,7 +152,7 @@ int main(void)
     stbi_set_flip_vertically_on_load(true);
 
     unsigned char* tex_bytes =
-        stbi_load("3D/partenza.jpg",
+        stbi_load("3D/ayaya.png",
             &img_width,
             &img_height,
             &colorChannels,
@@ -99,11 +166,11 @@ int main(void)
 
     glTexImage2D(GL_TEXTURE_2D,
         0,
-        GL_RGB,
+        GL_RGBA,
         img_width,
         img_height,
         0,
-        GL_RGB,
+        GL_RGBA,
         GL_UNSIGNED_BYTE,
         tex_bytes);
 
@@ -153,7 +220,7 @@ int main(void)
     glLinkProgram(shaderProg);
 
     /* Initialize Mesh Stuff*/
-    std::string path = "3D/djSword.obj";
+    std::string path = "3D/guitar.obj";
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -299,14 +366,14 @@ int main(void)
 
     float x, y, z;
     x = y = z = 0.0f;
-    y = -0.5f;
+    y = -0.25f;
 
     glm::mat4 translation =
         glm::translate(identity_matrix4,
             glm::vec3(x, y, z));
 
     float scale_x, scale_y, scale_z;
-    scale_x = scale_y = scale_z = 0.1f;
+    scale_x = scale_y = scale_z = 1.0f;
 
     glm::mat4 scale =
         glm::scale(identity_matrix4,
@@ -331,6 +398,9 @@ int main(void)
         100.0f
     );
 
+    // current projection set to perspective
+    projection = camera2.getProjection();
+
     /* Lighting Variables */
     glm::vec3 lightPos = glm::vec3(-10, 3, 0);
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
@@ -349,9 +419,15 @@ int main(void)
 
         theta += 0.1f;
 
+        // switch statement to switch between cameras
+        switch (cameraNum) {
+        case 1: projection = camera1.getProjection(); break;
+        case 2: projection = camera2.getProjection(); break;
+        }
+
         /* Camera */
         // camera position
-        glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
+        glm::vec3 cameraPos = glm::vec3(0, 0, 1.0f);
 
         glm::mat4 cameraPositionMatrix =
             glm::translate(glm::mat4(1.0f),
@@ -393,7 +469,7 @@ int main(void)
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x, y, z -5.f));
+            glm::vec3(x, y, z));
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
