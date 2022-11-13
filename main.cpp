@@ -556,7 +556,7 @@ int main(void)
     projection = camera2.getProjection();
 
     /* Lighting Variables */
-    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    glm::vec3 lightPos; /*= glm::vec3(-10, 3, 0); */
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
     float ambientStr = 0.1f;
@@ -571,6 +571,9 @@ int main(void)
     // point light
     pointLight.assignNums(1.f, 0.045f, 0.0075f);
 
+    // other variables
+    int objectNum;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -584,6 +587,8 @@ int main(void)
         case 1: projection = camera1.getProjection(); break;
         case 2: projection = camera2.getProjection(); break;
         }
+
+        objectNum = 1;
 
         /* Camera */
         // camera position
@@ -644,6 +649,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
+        lightPos = glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
@@ -692,6 +698,9 @@ int main(void)
 
         unsigned int quadLightAddress = glGetUniformLocation(shaderProg, "quadratic");
         glUniform1f(quadLightAddress, pointLight.getQuadratic());
+
+        unsigned int objNumAddress = glGetUniformLocation(shaderProg, "objNum");
+        glUniform1i(objNumAddress, objectNum);
             
         unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
         glUniformMatrix4fv(projLoc,
@@ -722,11 +731,13 @@ int main(void)
         // 2nd object load
         glBindVertexArray(VAO2);
 
+        objectNum = 2;
+
         transformation_matrix = glm::mat4(1.0f);
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f));
+            glm::vec3(x + 0.4f, y + 0.5f, z - 0.4f));
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
@@ -737,9 +748,15 @@ int main(void)
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glUniform1i(tex0Address, 0);
+        //glBindTexture(GL_TEXTURE_2D, texture);
+        //glUniform1i(tex0Address, 0);
 
+        glUniform1i(objNumAddress, objectNum);
+
+        unsigned int colorAddress = glGetUniformLocation(shaderProg, "color");
+        glUniform3fv(colorAddress,
+            1,
+            glm::value_ptr(glm::vec3(1, 1, 1)));
 
         glUniformMatrix4fv(projLoc,
             1,

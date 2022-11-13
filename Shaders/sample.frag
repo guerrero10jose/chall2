@@ -20,15 +20,18 @@ uniform vec3 cameraPos;
 uniform float specStr;
 uniform float specPhong;
 
+// point light color
+uniform vec3 color;
+uniform int objNum;
+
 in vec2 texCoord;
 in vec3 normCoord;
 in vec3 fragPos;
 
 out vec4 FragColor;
 
-void main() {
-	// FragColor = vec4(0.7f, 0f, 0f, 1f);
-	vec3 result;
+void applyLight() {
+vec3 result;
 
 	// get required parameter for diffuse formula
 	vec3 normal = normalize(normCoord);
@@ -93,4 +96,14 @@ void main() {
 	FragColor = vec4(result, 1.0) * texture(tex0, texCoord);
 
 	//FragColor = texture(tex0, texCoord);
+}
+
+void main() {
+	// FragColor = vec4(0.7f, 0f, 0f, 1f);
+
+	switch(objNum) {
+		case 1: applyLight(); break;
+		case 2: FragColor = vec4(1.f, 1.f, 1.f, 1f); break;
+	}
+	
 }
