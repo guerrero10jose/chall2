@@ -311,7 +311,7 @@ int main(void)
         0, 1, 2
     };
 
-    GLuint VAO, VBO;
+    GLuint VAO, VBO, VAO2, VBO2;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
@@ -350,6 +350,123 @@ int main(void)
         GL_FALSE,
         8 * sizeof(GL_FLOAT),
         (void*)uvPtr
+    );
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // 2nd obj (light source)
+    std::string path2 = "3D/lamp.obj";
+    std::vector<tinyobj::shape_t> shapes2;
+    std::vector<tinyobj::material_t> material2;
+    std::string warning2, error2;
+    tinyobj::attrib_t attributes2;
+
+    /* Load the Mesh */
+    bool success2 = tinyobj::LoadObj(&attributes2,
+        &shapes2,
+        &material2,
+        &warning2,
+        &error2,
+        path2.c_str());
+
+    std::vector<GLuint> mesh_indices2;
+    for (int i = 0; i < shapes2[0].mesh.indices.size(); i++) {
+        mesh_indices2.push_back(shapes2[0].mesh.indices[i].vertex_index);
+    }
+
+    std::vector<GLfloat> fullVertexData2;
+    for (int i = 0; i < shapes2[0].mesh.indices.size(); i++) {
+
+        tinyobj::index_t vData = shapes2[0].mesh.indices[i];
+
+        int vertexIndex = vData.vertex_index * 3;
+        int uvIndex = vData.texcoord_index * 2;
+        int normsIndex = vData.normal_index * 3;
+
+        // X
+        fullVertexData2.push_back(
+            attributes2.vertices[vertexIndex]
+        );
+
+        // Y
+        fullVertexData2.push_back(
+            attributes2.vertices[vertexIndex + 1]
+        );
+
+        // Z
+        fullVertexData2.push_back(
+            attributes2.vertices[vertexIndex + 2]
+        );
+
+        // normals
+        fullVertexData2.push_back(
+            attributes2.normals[normsIndex]
+        );
+
+        fullVertexData2.push_back(
+            attributes2.normals[normsIndex + 1]
+        );
+
+        fullVertexData2.push_back(
+            attributes2.normals[normsIndex + 2]
+        );
+
+        // U
+        fullVertexData2.push_back(
+            attributes2.texcoords[uvIndex]
+        );
+
+        // V
+        fullVertexData2.push_back(
+            attributes2.texcoords[uvIndex + 1]
+        );
+
+    }
+
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &VBO2);
+
+    glBindVertexArray(VAO2);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+    glBufferData(GL_ARRAY_BUFFER,
+        sizeof(GL_FLOAT) * fullVertexData2.size(),
+        fullVertexData2.data(),
+        GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),
+        (void*)0);
+
+    // norm ptr
+    GLintptr normPtr2 = 3 * sizeof(float);
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),
+        (void*)normPtr2
+    );
+
+    // uv ptr
+    GLintptr uvPtr2 = 6 * sizeof(float);
+    glVertexAttribPointer(
+        2,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),
+        (void*)uvPtr2
     );
 
     glEnableVertexAttribArray(0);
@@ -543,6 +660,63 @@ int main(void)
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 8);
 
+        // 2nd object load
+        glBindVertexArray(VAO2);
+
+        transformation_matrix = glm::mat4(1.0f);
+
+        // translation
+        transformation_matrix = glm::translate(transformation_matrix,
+            glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f));
+
+        // scale
+        transformation_matrix = glm::scale(transformation_matrix,
+            glm::vec3(0.01f, 0.01f, 0.01f));
+
+        // rotate
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(theta),
+            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniform1i(tex0Address, 0);
+
+        // diffuse stuff
+        glUniform3fv(lightAddress,
+            1,
+            glm::value_ptr(lightPos));
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(lightColor));
+
+        // ambient stuff
+        glUniform1f(ambientStrAddress, ambientStr);
+        glUniform3fv(ambientColorAddress,
+            1,
+            glm::value_ptr(ambientColor));
+
+        // specphong stuff
+        glUniform3fv(cameraPosAddress,
+            1,
+            glm::value_ptr(cameraPos));
+        glUniform1f(specStrAddress, specStr);
+        glUniform1f(specPhongAddress, specPhong);
+
+        glUniformMatrix4fv(projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(projection));
+        glUniformMatrix4fv(viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(viewMatrix));
+        glUniformMatrix4fv(transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(transformation_matrix));
+
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData2.size() / 8);
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
@@ -552,6 +726,8 @@ int main(void)
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO2);
+    glDeleteBuffers(1, &VBO2);
 
     glfwTerminate();
     return 0;
