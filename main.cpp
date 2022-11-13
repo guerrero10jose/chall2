@@ -20,6 +20,8 @@
 /* Global Variables */
 float window_height = 600.0f, window_width = 600.0f;
 float x_mod = 0;
+float rot_x = 0, rot_y = 1.f, rot_z = 0;
+float theta_x = 0, theta_y = 90.0f, theta_z = 0;
 
 /* Requirement: Camera Class */
 class Camera {
@@ -37,12 +39,12 @@ public:
     OrthoCamera() {
         // old code used from previous implementation
         // TODO: view from top
-        projection = glm::ortho(-2.0f,
-            2.0f,
-            -2.0f,
-            2.0f,
+        projection = glm::ortho(-1.0f,
+            1.0f,
             -1.0f,
-            1.0f);
+            1.0f,
+            -1.0f,
+            2.0f);
     }
 };
 
@@ -126,25 +128,34 @@ void Key_Callback(GLFWwindow* window,
     int mods)
 {
     if (key == GLFW_KEY_W &&
-        action == GLFW_PRESS) {
-
+        action == GLFW_REPEAT) {
+        theta_x -= 2.f;
     }
 
     if (key == GLFW_KEY_A &&
-        action == GLFW_PRESS) {
-
+        action == GLFW_REPEAT) {
+        theta_y -= 2.f;
     }
 
     if (key == GLFW_KEY_S &&
-        action == GLFW_PRESS) {
-
+        action == GLFW_REPEAT) {
+        theta_x += 2.f;
     }
 
     // when user presses D
     if (key == GLFW_KEY_D &&
-        action == GLFW_PRESS) {
-        // move bunny to the right
-        x_mod += 10.0f;
+        action == GLFW_REPEAT) {
+        theta_y += 2.f;
+    }
+
+    if (key == GLFW_KEY_Q &&
+        action == GLFW_REPEAT) {
+        theta_z -= 2.f;
+    }
+
+    if (key == GLFW_KEY_E &&
+        action == GLFW_REPEAT) {
+        theta_z += 2.f;
     }
 
     /* Requirement: Swap Cameras */
@@ -156,7 +167,7 @@ void Key_Callback(GLFWwindow* window,
     /* Requirement: Swap Cameras */
     if (key == GLFW_KEY_2 &&
         action == GLFW_PRESS) {
-        cameraNum = 1;
+        cameraNum = 2;
     }
 
 }
@@ -533,15 +544,11 @@ int main(void)
         glm::scale(identity_matrix4,
             glm::vec3(scale_x, scale_y, scale_z));
 
-    float rot_x, rot_y, rot_z;
-    rot_x = rot_y = rot_z = 0;
-    rot_y = 1.0f;
-
-    float theta = 90.0f;
+    
 
     glm::mat4 rotation =
         glm::rotate(identity_matrix4,
-            glm::radians(theta),
+            glm::radians(theta_x),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
     // perspective camera
@@ -580,7 +587,9 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        theta += 0.1f;
+        //theta += 0.1f;
+
+        /* Movements */
 
         // switch statement to switch between cameras
         switch (cameraNum) {
@@ -640,10 +649,23 @@ int main(void)
         transformation_matrix = glm::scale(transformation_matrix,
             glm::vec3(scale_x, scale_y, scale_z));
 
+        glm::vec3 xRot(1.f, 0, 0);
+        glm::vec3 yRot(0, 1.f, 0);
+        glm::vec3 zRot(0, 0, 1.f);
+
         // rotate
         transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(theta),
-            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+            glm::radians(theta_x),
+            glm::normalize(xRot));
+
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(theta_y),
+            glm::normalize(yRot));
+
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(theta_z),
+            glm::normalize(zRot));
+
 
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -745,8 +767,8 @@ int main(void)
 
         // rotate
         transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(theta),
-            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+            glm::radians(90.f),
+            glm::normalize(glm::vec3(0, 1.f, 0)));
 
         //glBindTexture(GL_TEXTURE_2D, texture);
         //glUniform1i(tex0Address, 0);
