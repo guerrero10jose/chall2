@@ -31,13 +31,39 @@ in vec3 fragPos;
 
 out vec4 FragColor;
 
-void main() {
-
-	vec3 result, result2;
+vec3 calcPointLight(vec3 ambient, vec3 diffuse2, vec3 specular, vec3 viewDir2) {
 
 	// get required parameter for diffuse formula
 	vec3 normal = normalize(normCoord);
-	// vec3 lightDir = normalize(lightPos - fragPos);
+	vec3 lightDir = normalize(lightPos - fragPos);
+
+	// apply formula and multiply with light color
+	float diff = max(dot(normal, lightDir), 0.0f);
+
+	vec3 reflectDir = reflect(-lightDir, normal);
+	float spec = pow(max(dot(reflectDir, viewDir2), 0.1), specPhong);
+
+	/* Point Light */
+
+	// attenuation
+	float distance = length(lightPos - fragPos);
+	float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+
+	ambient *= attenuation;
+	diffuse2 *= attenuation;
+	specular *= attenuation;
+
+	return (ambient + diffuse2 + specular);
+
+}
+
+void main() {
+
+	vec3 result;
+
+	// get required parameter for diffuse formula
+	vec3 normal = normalize(normCoord);
+
 	vec3 lightDir = normalize(-dirLight);
 
 	// apply formula and multiply with light color
@@ -55,58 +81,16 @@ void main() {
 	float spec = pow(max(dot(reflectDir, viewDir), 0.1), specPhong);
 	vec3 specColor = spec * specStr * lightColor;
 
-	result = ambientCol + diffuse + specColor;
+	result = (ambientCol + diffuse + specColor);
 
-	/* Point Light */
+	result += calcPointLight(ambientCol, diffuse, specColor, viewDir);
 
-	// get required parameter for diffuse formula
-	normal = normalize(normCoord);
-	lightDir = normalize(lightPos - fragPos);
-
-	// apply formula and multiply with light color
-	diff = max(dot(normal, lightDir), 0.0f);
-	//diffuse = diff * lightColor;
-
-	// get the ambient light
-	ambientCol = ambientColor * ambientStr;
-
-	// get view direction and reflection vector
-	viewDir = normalize(cameraPos - fragPos);
-	reflectDir = reflect(-lightDir, normal);
-
-	// get specular light
-	spec = pow(max(dot(reflectDir, viewDir), 0.1), specPhong);
-	//specColor = spec * specStr * lightColor;
-
-	// attenuation
-	float distance = length(lightPos - fragPos);
-	float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
-
-	// combine
-	vec3 ambient = ambientCol * vec3(texture(tex0, texCoord));
-	vec3 diffuse2 = diffuse * diff * vec3(texture(tex0, texCoord));
-	vec3 specular = specColor * spec  * vec3(texture(tex0, texCoord));
-
-	// combine
-	vec3 ambient2 = ambientCol * vec3(0.7f, 0f, 0f);
-	vec3 diffuse3 = diffuse * diff * vec3(0.7f, 0f, 0f);
-	vec3 specular2 = specColor * spec  * vec3(0.7f, 0f, 0f);
-
-	ambient *= attenuation;
-	diffuse2 *= attenuation;
-	specular *= attenuation;
-
-	ambient2 *= attenuation;
-	diffuse3 *= attenuation;
-	specular2 *= attenuation;
-
+	//FragColor = vec4(result, 1.0) * texture(tex0, texCoord);
 
 	if(objNum == 1) {
-		result += ambient + diffuse2 + specular; 
 		FragColor = vec4(result, 1.0) * texture(tex0, texCoord);
-	}  else if(objNum == 2) {
-		//FragColor = vec4(result, 1.0) * vec4(0f, 0f, 0f, 1f);
-		FragColor = vec4(1f, 1f, 1f, 1f);
+	} else {
+		FragColor = vec4(1, 1, 1, 1.0);
 	}
 
 }

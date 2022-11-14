@@ -604,7 +604,7 @@ int main(void)
     projection = camera2.getProjection();
 
     /* Lighting Variables */
-    glm::vec3 lightPos; /*= glm::vec3(-10, 3, 0); */
+    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
     glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 
     float ambientStr = 0.1f;
@@ -622,6 +622,7 @@ int main(void)
 
     // other variables
     int objectNum;
+    float mov_x = 0;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -629,13 +630,12 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
         glm::vec3 cameraPos;
 
         // switch statement to switch between cameras
         switch (cameraNum) {
         case 1: projection = camera1.getProjection(); cameraPos = glm::vec3(0.f, 1.f, 0.5f); break;
-        case 2: projection = camera2.getProjection(); cameraPos = glm::vec3(0.f, 0.f, -2.f);  break;
+        case 2: projection = camera2.getProjection(); cameraPos = glm::vec3(0.f, 0.f, 1.5f);  break;
         }
 
         objectNum = 1;
@@ -713,7 +713,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
-        lightPos = glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f);
+        //lightPos = glm::vec3(x + 0.4f + mov_x, y + 0.6f, z + 0.1f);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
@@ -763,7 +763,6 @@ int main(void)
         unsigned int quadLightAddress = glGetUniformLocation(shaderProg, "quadratic");
         glUniform1f(quadLightAddress, pointLight.getQuadratic());
 
-
         unsigned int objNumAddress = glGetUniformLocation(shaderProg, "objNum");
         glUniform1i(objNumAddress, objectNum);
             
@@ -802,7 +801,7 @@ int main(void)
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            pointLightPos = glm::vec3(x + 0.4f + tran_x, y + 0.5f + tran_y, z - 0.4f + tran_z));
+            pointLightPos = glm::vec3(x + 0.4f + tran_x + mov_x, y + 0.5f + tran_y, z - 0.4f + tran_z));
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
