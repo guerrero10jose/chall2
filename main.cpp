@@ -370,6 +370,7 @@ int main(void)
     glLinkProgram(shaderProg);
 
     /* Initialize Mesh Stuff*/
+    /* Free Model Objects taken from Turbosquid.com */
     std::string path = "3D/guitar.obj";
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> material;
