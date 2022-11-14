@@ -24,6 +24,52 @@ float rot_x = 0, rot_y = 1.f, rot_z = 0;
 float theta_x = 0, theta_y = 90.0f, theta_z = 0;
 float tran_x = 0, tran_y = 0, tran_z = 0;
 int objCtrl = 1;
+float ambientStr = 0.1f;
+
+/* These items are for the camera and are global variables in order to be
+    accessed by key callback functions*/
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 cameraRight = glm::vec3(1.0f, 0.0f, 0.0f);
+
+float lastX = 400, lastY = 300, yaw = -90.0f, pitch = 0;
+bool firstMouse = true;
+
+/* Implementation derived from https://learnopengl.com/Getting-started/Camera */
+void Mouse_Callback(GLFWwindow* window, double xpos, double ypos) {
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(direction);
+}
+
 
 /* Requirement: Camera Class */
 class Camera {
@@ -143,6 +189,17 @@ void Key_Callback(GLFWwindow* window,
         objCtrl = 1;
     }
 
+    /* Requirement: Intensity */
+    if (key == GLFW_KEY_LEFT &&
+        action == GLFW_PRESS) {
+        ambientStr -= 0.1f;
+    }
+
+    if (key == GLFW_KEY_RIGHT &&
+        action == GLFW_PRESS) {
+        ambientStr += 0.1f;
+    }
+
     if (objCtrl == 1) {
         if (key == GLFW_KEY_W &&
             action == GLFW_REPEAT) {
@@ -208,6 +265,7 @@ void Key_Callback(GLFWwindow* window,
             action == GLFW_REPEAT) {
             tran_z += 0.1f;
         }
+
     }
 
 
@@ -233,6 +291,8 @@ int main(void)
     glfwMakeContextCurrent(window);
     /* Initialize GLAD */
     gladLoadGL();
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     int img_width,
         img_height,
@@ -275,6 +335,7 @@ int main(void)
 
     /* Set Callback function */
     glfwSetKeyCallback(window, Key_Callback);
+    glfwSetCursorPosCallback(window, Mouse_Callback);
 
     /* Load Vertex/Fragment Shaders*/
     // vertex shader
@@ -607,7 +668,6 @@ int main(void)
     glm::vec3 lightPos = glm::vec3(-10, 3, 0);
     glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 
-    float ambientStr = 0.1f;
     glm::vec3 ambientColor = lightColor;
 
     float specStr = 0.5f;
@@ -645,6 +705,7 @@ int main(void)
         //glm::vec3 cameraPos = glm::vec3(0.f, 1.f, 0.5f);
         //glm::vec3 cameraPos = glm::vec3(0.f, 0.f, 1.f);
 
+        /*
         glm::mat4 cameraPositionMatrix =
             glm::translate(glm::mat4(1.0f),
                 cameraPos * -1.0f);
@@ -679,7 +740,8 @@ int main(void)
         cameraOrientation[2][2] = -F.z;
 
         //glm::mat4 viewMatrix = cameraOrientation * cameraPositionMatrix;
-        glm::mat4 viewMatrix = glm::lookAt(cameraPos, Center, WorldUp);
+        glm::mat4 viewMatrix = glm::lookAt(cameraPos, Center, WorldUp); */
+        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 transformation_matrix = glm::mat4(1.0f);
 
