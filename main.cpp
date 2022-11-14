@@ -45,8 +45,8 @@ public:
             1.0f,
             -1.0f,
             1.0f,
-            -1.0f,
-            2.0f);
+            -5.0f,
+            5.0f);
     }
 };
 
@@ -103,7 +103,7 @@ public:
     void assignNums(float cons, float lin, float quad) {
         constant = cons;
         linear = lin;
-        quadratic = quadratic;
+        quadratic = quad;
     }
 
     float getConstant() {
@@ -605,7 +605,7 @@ int main(void)
 
     /* Lighting Variables */
     glm::vec3 lightPos; /*= glm::vec3(-10, 3, 0); */
-    glm::vec3 lightColor = glm::vec3(1, 1, 1);
+    glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 
     float ambientStr = 0.1f;
     glm::vec3 ambientColor = lightColor;
@@ -617,7 +617,7 @@ int main(void)
     dirLight.assignlightDir(glm::vec3(-4, 11, -3));
 
     // point light
-    pointLight.assignNums(1.f, 0.045f, 0.0075f);
+    pointLight.assignNums(1.f, 0.09f, 0.0032f);
     glm::vec3 pointLightPos;
 
     // other variables
@@ -635,7 +635,7 @@ int main(void)
         // switch statement to switch between cameras
         switch (cameraNum) {
         case 1: projection = camera1.getProjection(); cameraPos = glm::vec3(0.f, 1.f, 0.5f); break;
-        case 2: projection = camera2.getProjection(); cameraPos = glm::vec3(0.f, 0.f, 1.f);  break;
+        case 2: projection = camera2.getProjection(); cameraPos = glm::vec3(0.f, 0.f, -2.f);  break;
         }
 
         objectNum = 1;
@@ -713,7 +713,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
-        //lightPos = glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f);
+        lightPos = glm::vec3(x + 0.4f, y + 0.6f, z + 0.1f);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
