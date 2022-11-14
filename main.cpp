@@ -665,7 +665,7 @@ int main(void)
     projection = camera2.getProjection();
 
     /* Lighting Variables */
-    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    glm::vec3 lightPos; /*= glm::vec3(-10, 3, 0);*/
     glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 
     glm::vec3 ambientColor = lightColor;
@@ -775,7 +775,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
-        //lightPos = glm::vec3(x + 0.4f + mov_x, y + 0.6f, z + 0.1f);
+        lightPos = glm::vec3(x + 0.4f + mov_x, y + 0.6f, z + 0.1f);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
