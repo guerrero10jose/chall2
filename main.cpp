@@ -141,6 +141,7 @@ int main(void)
     glShaderSource(vertexShader, 1, &v, NULL);
     glCompileShader(vertexShader);
 
+
     GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragShader, 1, &f, NULL);
     glCompileShader(fragShader);
