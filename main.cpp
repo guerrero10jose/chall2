@@ -31,38 +31,14 @@ void Key_Callback(GLFWwindow* window,
     // when user presses D
     if (key == GLFW_KEY_D &&
         action == GLFW_REPEAT) {
-        // move bunny to the right
         x_cam -= 0.5f;
     }
 
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
-        // move bunny to the right
         x_cam += 0.5f;
     }
 }
-
-/* Requirement: Camera Class */
-class Camera {
-
-};
-
-// orthographic camera class
-class Ortho: public Camera {
-
-};
-
-// perspective camera class
-class Persp : public Camera {
-
-    // old code used for previous implementation
-    glm::mat4 projection = glm::ortho(-2.0f,
-        2.0f,
-        -2.0f,
-        2.0f,
-        -1.0f,
-        1.0f);
-};
 
 int main(void)
 {
@@ -116,6 +92,40 @@ int main(void)
 
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(tex_bytes);
+
+    // 2nd image (yae)
+    /* Load the 2nd image with yae but since its png we modify to RGBA and assign to GL_TEXTURE2*/
+    int img_width3,
+        img_height3,
+        colorChannels3;
+
+    stbi_set_flip_vertically_on_load(true);
+
+    unsigned char* tex2_bytes =
+        stbi_load("3D/yae.png",
+            &img_width3,
+            &img_height3,
+            &colorChannels3,
+            0);
+
+    GLuint texture2;
+
+    glGenTextures(1, &texture2);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    glTexImage2D(GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        img_width3,
+        img_height3,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        tex2_bytes);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(tex2_bytes);
 
     int img_width2,
         img_height2,
@@ -601,8 +611,10 @@ int main(void)
 
     float rot_x, rot_y, rot_z;
     rot_x = rot_y = rot_z = 0;
-    rot_x = 1.0f;
+    rot_y = 1.0f;
+    // float theta = -90.f;
     float theta = -90.f;
+    float theta_mod = -90.f;
 
     glm::mat4 rotation =
         glm::rotate(identity_matrix4,
@@ -639,7 +651,7 @@ int main(void)
         //glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_DST_COLOR);
         //glBlendEquation(GL_FUNC_SUBTRACT);
 
-        theta += 0.1f;
+        theta_mod -= 0.1f;
 
         /* Camera */
         // camera position
@@ -723,6 +735,10 @@ int main(void)
         // rotate
         transformation_matrix = glm::rotate(transformation_matrix,
             glm::radians(theta),
+            glm::normalize(glm::vec3(0, 0, 1.f)));
+
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(theta_mod),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
         glActiveTexture(GL_TEXTURE0);
@@ -734,6 +750,12 @@ int main(void)
         GLuint tex1Address = glGetUniformLocation(shaderProg, "norm_tex");
         glBindTexture(GL_TEXTURE_2D, norm_tex);
         glUniform1i(tex1Address, 1);
+
+        /* Insert Yae texture on top of the previous two*/
+        glActiveTexture(GL_TEXTURE2);
+        GLuint tex2Address = glGetUniformLocation(shaderProg, "tex1");
+        glBindTexture(GL_TEXTURE_2D, texture2);
+        glUniform1i(tex2Address, 2);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");

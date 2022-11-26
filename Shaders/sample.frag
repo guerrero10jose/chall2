@@ -2,6 +2,7 @@
 
 uniform sampler2D tex0;
 uniform sampler2D norm_tex;
+uniform sampler2D tex1;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -25,7 +26,9 @@ void main() {
 	// FragColor = vec4(0.7f, 0f, 0f, 1f);
 
 	// Current pixel
-	vec4 pixelColor = texture(tex0, texCoord);
+	// 0.6 opacity required, use mix to blend the two textures which will be the combination of the two textures
+	vec4 pixelColor = mix(texture(tex0, texCoord), texture(tex1, texCoord), 0.6);
+
 	if(pixelColor.a < 0.1) {
 		discard;
 	}
